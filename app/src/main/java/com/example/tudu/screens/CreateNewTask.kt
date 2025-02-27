@@ -43,9 +43,11 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.tudu.util.Utils
 import com.example.tudu.util.Utils.formatDateFromMillis
+import com.example.tudu.viewModels.NewTaskVM
 import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,29 +76,33 @@ fun CreateTaskScreen(modifier: Modifier = Modifier, navController: NavController
             )
         }
     ) { paddingValues ->
+        val newTaskVM: NewTaskVM = viewModel()
+
         Column(
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
-            TaskNameInput()
-            TaskDateInput()
-            TaskAlarm()
-            SaveTask()
+            TaskNameInput(newTaskVM.taskTitle, newTaskVM::updateTaskTitle)
+            TaskDateInput(newTaskVM)
+            TaskAlarm(newTaskVM)
+            SaveTask(newTaskVM)
         }
     }
 }
 
 @Composable
-fun TaskNameInput(modifier: Modifier = Modifier) {
-    val text = remember { mutableStateOf("") }
+fun TaskNameInput(taskTitle: String, updateTitle: (String) -> Unit) {
     Column(
         modifier = Modifier.padding(16.dp, 12.dp)
     ) {
         Text("Task Title")
         OutlinedTextField(
-            value = text.value,
-            onValueChange = { text.value = it },
+            value = taskTitle,
+            onValueChange = { updateTitle(it) },
+            placeholder = {
+                Text("Enter your task")
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .border(1.dp, Color.Gray, RoundedCornerShape(12.dp)),
@@ -107,37 +113,28 @@ fun TaskNameInput(modifier: Modifier = Modifier) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TaskDateInput(modifier: Modifier = Modifier) {
-    val datePickerState = rememberDatePickerState()
-    val calendar = Calendar.getInstance()
-    val hour = calendar.get(Calendar.HOUR_OF_DAY)
-    val minute = calendar.get(Calendar.MINUTE)
-    var showDatePicker by remember { mutableStateOf(false) }
-    var showTimePicker by remember { mutableStateOf(false) }
-    var selectedDate by remember { mutableStateOf(Utils.formatDateFromMillis(System.currentTimeMillis())) }
-    var selectedTime by remember { mutableStateOf(Utils.formatTime(hour, minute)) }
-
+fun TaskDateInput(newTaskVM: NewTaskVM) {
 
     val timePickerDialog = TimePickerDialog(
         LocalContext.current,
         { _, selectedHour, selectedMinute ->
-            selectedTime = Utils.formatTime(selectedHour, selectedMinute)
+            newTaskVM.selectedTime = Utils.formatTime(selectedHour, selectedMinute)
         },
-        hour,
-        minute,
+        newTaskVM.hour,
+        newTaskVM.minute,
         false // Set to 'true' for 24-hour format
     )
 
     // Show Date Picker
-    if (showDatePicker) {
+    if (newTaskVM.showDatePicker) {
         DatePickerDialog(
-            onDismissRequest = { showDatePicker = false },
+            onDismissRequest = { newTaskVM.showDatePicker = false },
             confirmButton = {
                 TextButton(onClick = {
-                    showDatePicker = false
-                    datePickerState.selectedDateMillis?.let { millis ->
-                        selectedDate = formatDateFromMillis(millis, "dd MMM yyyy") // Format date
-                        showTimePicker = true
+                    newTaskVM.showDatePicker = false
+                    newTaskVM.datePickerState.selectedDateMillis?.let { millis ->
+                        newTaskVM.selectedDate = formatDateFromMillis(millis, "dd MMM yyyy") // Format date
+                        newTaskVM.showTimePicker = true
                         timePickerDialog.show()
                     }
                 }) {
@@ -145,7 +142,7 @@ fun TaskDateInput(modifier: Modifier = Modifier) {
                 }
             }
         ) {
-            DatePicker(state = datePickerState)
+            DatePicker(state = newTaskVM.datePickerState)
         }
     }
 
@@ -154,7 +151,7 @@ fun TaskDateInput(modifier: Modifier = Modifier) {
     ) {
         Text("Due By")
         OutlinedTextField(
-            value = "$selectedTime, $selectedDate",
+            value = "${newTaskVM.selectedTime}, ${newTaskVM.selectedDate}",
             onValueChange = {},
             readOnly = true,
             modifier = Modifier
@@ -167,7 +164,7 @@ fun TaskDateInput(modifier: Modifier = Modifier) {
                     contentDescription = "Back",
                     modifier = Modifier
                         .clickable {
-                            showDatePicker = !showDatePicker
+                            newTaskVM.showDatePicker = !newTaskVM.showDatePicker
                         }
                 )
             }
@@ -176,8 +173,7 @@ fun TaskDateInput(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun TaskAlarm(modifier: Modifier = Modifier) {
-    var isChecked by remember { mutableStateOf(false) }
+fun TaskAlarm(newTaskVM: NewTaskVM) {
     Row(
         modifier = Modifier
             .padding(16.dp, 12.dp)
@@ -190,14 +186,14 @@ fun TaskAlarm(modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.titleMedium
         )
         Switch(
-            checked = isChecked,
-            onCheckedChange = { isChecked = it }
+            checked = newTaskVM.isChecked,
+            onCheckedChange = { newTaskVM.isChecked = it }
         )
     }
 }
 
 @Composable
-fun SaveTask(modifier: Modifier = Modifier) {
+fun SaveTask(newTaskVM:NewTaskVM) {
     Button(
         {},
         modifier = Modifier
