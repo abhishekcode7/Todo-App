@@ -16,6 +16,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.tudu.screens.MainScreen
+import com.example.tudu.screens.CreateTaskScreen
 import com.example.tudu.ui.theme.TuduTheme
 
 class MainActivity : ComponentActivity() {
@@ -44,6 +45,9 @@ class MainActivity : ComponentActivity() {
 fun App(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
     NavHost(navController, startDestination = "main") {
-        composable("main") { MainScreen(modifier) }
+        composable("main") { MainScreen(modifier, navController) }
+        composable("newTask") {
+            CreateTaskScreen(navController = navController)
+        }
     }
 }
