@@ -1,6 +1,10 @@
 package com.example.tudu.screens
 
 import android.app.TimePickerDialog
+import android.util.Log
+import android.widget.Toast
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -8,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -31,6 +36,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,7 +65,7 @@ fun CreateTaskScreen(modifier: Modifier = Modifier, navController: NavController
             TopAppBar(
                 title = {
                     Text(
-                        "New Task",
+                        "New Todo",
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -78,12 +85,20 @@ fun CreateTaskScreen(modifier: Modifier = Modifier, navController: NavController
     ) { paddingValues ->
         val newTaskVM: NewTaskVM = viewModel()
 
+        val navigateBack by newTaskVM.navigateBack.collectAsState()
+
+        LaunchedEffect(navigateBack) {
+            if (navigateBack) {
+                navController.popBackStack()
+            }
+        }
+
         Column(
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
-            TaskNameInput(newTaskVM.taskTitle, newTaskVM::updateTaskTitle)
+            TaskNameInput(newTaskVM)
             TaskDateInput(newTaskVM)
             TaskAlarm(newTaskVM)
             SaveTask(newTaskVM)
@@ -92,14 +107,14 @@ fun CreateTaskScreen(modifier: Modifier = Modifier, navController: NavController
 }
 
 @Composable
-fun TaskNameInput(taskTitle: String, updateTitle: (String) -> Unit) {
+fun TaskNameInput(newTaskVM: NewTaskVM) {
     Column(
         modifier = Modifier.padding(16.dp, 12.dp)
     ) {
-        Text("Task Title")
+        Text("Todo Title")
         OutlinedTextField(
-            value = taskTitle,
-            onValueChange = { updateTitle(it) },
+            value = newTaskVM.taskTitle,
+            onValueChange = { newTaskVM.updateTaskTitle(it) },
             placeholder = {
                 Text("Enter your task")
             },
@@ -119,6 +134,8 @@ fun TaskDateInput(newTaskVM: NewTaskVM) {
         LocalContext.current,
         { _, selectedHour, selectedMinute ->
             newTaskVM.selectedTime = Utils.formatTime(selectedHour, selectedMinute)
+            newTaskVM.selectedHour = selectedHour
+            newTaskVM.selectedMinute = selectedMinute
         },
         newTaskVM.hour,
         newTaskVM.minute,
@@ -133,8 +150,10 @@ fun TaskDateInput(newTaskVM: NewTaskVM) {
                 TextButton(onClick = {
                     newTaskVM.showDatePicker = false
                     newTaskVM.datePickerState.selectedDateMillis?.let { millis ->
-                        newTaskVM.selectedDate = formatDateFromMillis(millis, "dd MMM yyyy") // Format date
+                        newTaskVM.selectedDate =
+                            formatDateFromMillis(millis, "dd MMM yyyy") // Format date
                         newTaskVM.showTimePicker = true
+                        newTaskVM.selectedDateMillis = millis
                         timePickerDialog.show()
                     }
                 }) {
@@ -193,9 +212,21 @@ fun TaskAlarm(newTaskVM: NewTaskVM) {
 }
 
 @Composable
-fun SaveTask(newTaskVM:NewTaskVM) {
+fun SaveTask(newTaskVM: NewTaskVM) {
+    val context = LocalContext.current
+
     Button(
-        {},
+        {
+            if (newTaskVM.taskTitle != "") {
+                newTaskVM.saveTodo()
+            } else {
+                Toast.makeText(
+                    context,
+                    "Please add task title",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        },
         modifier = Modifier
             .padding(16.dp, 12.dp)
             .fillMaxWidth(),
@@ -206,7 +237,7 @@ fun SaveTask(newTaskVM:NewTaskVM) {
         shape = RoundedCornerShape(16.dp)
     ) {
         Text(
-            "Save Task",
+            "Save Todo",
             style = MaterialTheme.typography.headlineSmall
         )
     }
