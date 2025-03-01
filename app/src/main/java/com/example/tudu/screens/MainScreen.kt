@@ -1,6 +1,7 @@
 package com.example.tudu.screens
 
 import android.annotation.SuppressLint
+import android.text.format.DateUtils
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -41,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -152,7 +154,7 @@ fun TodoItem(todoData: TodoData, mainScreenVM: MainScreenVM) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(0.dp,12.dp),
+            .padding(0.dp, 12.dp),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         colors = CardDefaults.cardColors(
@@ -178,14 +180,18 @@ fun TodoItem(todoData: TodoData, mainScreenVM: MainScreenVM) {
                     text = todoData.title,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(0.dp, 16.dp, 0.dp, 0.dp)
+                    modifier = Modifier.padding(0.dp, 16.dp, 0.dp, 0.dp),
+                    textDecoration = if (todoData.isCompleted) TextDecoration.LineThrough else null
                 )
-                val time = Utils.formatTime(
+                var time = Utils.formatTime(
                     todoData.hour,
                     todoData.minute
-                ) + ", " + Utils.formatDateFromMillis(todoData.date)
+                )
+                if (!DateUtils.isToday(todoData.date)) time += ", " + Utils.formatDateFromMillis(
+                    todoData.date
+                )
                 Text(
-                    text = time,
+                    text = if (todoData.isCompleted) "Completed" else time,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 16.dp)
                 )
