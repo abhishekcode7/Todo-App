@@ -4,6 +4,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.io.Serializable
 
 @Entity(tableName = "todo_table")
 data class TodoData(
@@ -14,4 +15,4 @@ data class TodoData(
     val hour:Int,
     val minute:Int,
     var isCompleted:Boolean = false
-)
+) : Serializable

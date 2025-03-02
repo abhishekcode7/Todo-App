@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.tudu.roomDB.TodoData
 import com.example.tudu.util.Utils
 import com.example.tudu.util.Utils.formatDateFromMillis
 import com.example.tudu.viewModels.NewTaskVM
@@ -59,7 +60,7 @@ import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateTaskScreen(modifier: Modifier = Modifier, navController: NavController) {
+fun CreateTaskScreen(navController: NavController, todoData: TodoData? = null) {
     Scaffold(
         topBar = {
             TopAppBar(

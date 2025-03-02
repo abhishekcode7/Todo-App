@@ -35,8 +35,14 @@ class MainScreenVM : ViewModel() {
             delay(2000L)
             Utils.db.todoDao().deleteById(id)
         }
-        todoItems = todoItems.mapIndexed { i, item ->
-            if (item.id == id) item.copy(isCompleted = !item.isCompleted) else item
+//        todoItems = todoItems.mapIndexed { i, item ->
+//            if (item.id == id) item.copy(isCompleted = !item.isCompleted) else item
+//        }
+    }
+
+    fun deleteTodo(id: Int) {
+        viewModelScope.launch {
+            Utils.db.todoDao().deleteById(id)
         }
     }
 
