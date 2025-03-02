@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     kotlin("kapt")
+    alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.google.firebase.crashlytics)
 }
 
 android {
@@ -63,6 +65,10 @@ dependencies {
     kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
 
+    // firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.google.firebase.crashlytics)
+    implementation(libs.firebase.analytics)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

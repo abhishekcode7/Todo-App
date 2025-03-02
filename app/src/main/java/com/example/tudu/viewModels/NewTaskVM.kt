@@ -4,6 +4,7 @@ import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -23,7 +24,7 @@ class NewTaskVM : ViewModel() {
 
     var taskTitle by mutableStateOf("")
         private set
-    var taskId by mutableStateOf(1)
+    private var taskId by mutableIntStateOf(1)
     private val calendar: Calendar = Calendar.getInstance()
     val hour = calendar.get(Calendar.HOUR_OF_DAY)
     val minute = calendar.get(Calendar.MINUTE)

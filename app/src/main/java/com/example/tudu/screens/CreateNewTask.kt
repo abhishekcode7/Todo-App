@@ -113,7 +113,7 @@ fun CreateTaskScreen(navController: NavController) {
         ) {
             TaskNameInput(newTaskVM)
             TaskDateInput(newTaskVM)
-            TaskAlarm(newTaskVM)
+//            TaskAlarm(newTaskVM)
             SaveTask(newTaskVM)
         }
     }
