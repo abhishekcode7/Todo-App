@@ -65,6 +65,8 @@ fun MainScreen(modifier: Modifier = Modifier, navController: NavController) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
+                    navController.previousBackStackEntry?.savedStateHandle?.
+                    remove<TodoData>("todoData")
                     navController.navigate("newTask")
                 },
                 containerColor = Color.Black,

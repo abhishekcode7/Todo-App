@@ -19,6 +19,15 @@ interface TodoDao {
     @Query("DELETE FROM todo_table WHERE id = :itemId")
     suspend fun deleteById(itemId: Int)
 
-    @Query("UPDATE todo_table SET id = :id, isCompleted = :isCompleted WHERE id = :id")
-    suspend fun updateTodoById(id: Int, isCompleted:Boolean)
+    @Query("UPDATE todo_table SET isCompleted = :isCompleted WHERE id = :id")
+    suspend fun updateTodoById(id: Int, isCompleted: Boolean)
+
+    @Query("UPDATE todo_table SET title = :title,date = :date,hour = :hour,minute=:minute WHERE id = :id")
+    suspend fun updateAllTodoFields(
+        id: Int,
+        title: String,
+        date: Long,
+        hour: Int,
+        minute: Int
+    )
 }

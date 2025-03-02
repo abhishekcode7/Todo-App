@@ -2,6 +2,7 @@ package com.example.tudu
 
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -48,12 +50,9 @@ fun App(modifier: Modifier = Modifier) {
     NavHost(navController, startDestination = "main") {
         composable("main") { MainScreen(modifier, navController) }
         composable("newTask") {
-            val todoData = navController.previousBackStackEntry
-                ?.savedStateHandle
-                ?.get<TodoData>("todoData")
+
             CreateTaskScreen(
-                navController = navController,
-                todoData = todoData
+                navController = navController
             )
         }
     }

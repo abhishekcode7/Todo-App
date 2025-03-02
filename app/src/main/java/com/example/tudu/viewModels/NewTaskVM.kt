@@ -19,15 +19,15 @@ import java.util.Locale
 import kotlin.math.min
 
 
-class NewTaskVM: ViewModel() {
+class NewTaskVM : ViewModel() {
 
     var taskTitle by mutableStateOf("")
         private set
-
+    var taskId by mutableStateOf(1)
     private val calendar: Calendar = Calendar.getInstance()
     val hour = calendar.get(Calendar.HOUR_OF_DAY)
     val minute = calendar.get(Calendar.MINUTE)
-    
+
     var showDatePicker by mutableStateOf(false)
     var showTimePicker by mutableStateOf(false)
     var selectedDate by mutableStateOf(Utils.formatDateFromMillis(System.currentTimeMillis()))
@@ -40,16 +40,51 @@ class NewTaskVM: ViewModel() {
     val datePickerState = DatePickerState(Locale.getDefault())
 
     var isChecked by mutableStateOf(false)
-
+    var isEditing = false
 
     private val _navigateBack = MutableStateFlow(false)
     val navigateBack: StateFlow<Boolean> = _navigateBack
 
-    fun updateTaskTitle(title:String){
+    fun updateTaskTitle(title: String) {
         taskTitle = title
     }
 
+    fun setInitialData(todoData: TodoData?) {
+        todoData?.let {
+            isEditing = true
+
+            taskId = it.id
+            taskTitle = it.title
+            selectedHour = it.hour
+            selectedMinute = it.minute
+            isChecked = it.isCompleted
+            selectedDateMillis = it.date
+
+            selectedDate = Utils.formatDateFromMillis(it.date)
+            selectedTime = Utils.formatTime(it.hour, it.minute)
+        }
+    }
+
     fun saveTodo() {
+        if (isEditing) {
+            updateTodo()
+        } else createAndSaveTodo()
+    }
+
+    private fun updateTodo() {
+        viewModelScope.launch {
+            Utils.db.todoDao().updateAllTodoFields(
+                id = taskId,
+                title = taskTitle,
+                date = selectedDateMillis,
+                hour = selectedHour,
+                minute = selectedMinute,
+            )
+            _navigateBack.value = true
+        }
+    }
+
+    private fun createAndSaveTodo() {
         val todoData = TodoData(
             title = taskTitle,
             date = selectedDateMillis,

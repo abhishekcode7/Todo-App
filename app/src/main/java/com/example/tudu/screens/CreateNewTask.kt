@@ -60,13 +60,25 @@ import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateTaskScreen(navController: NavController, todoData: TodoData? = null) {
+fun CreateTaskScreen(navController: NavController) {
+    var screenTitle by remember { mutableStateOf("New Todo") }
+    val todoData = navController.previousBackStackEntry
+        ?.savedStateHandle
+        ?.get<TodoData>("todoData")
+
+    LaunchedEffect(todoData) {
+        if (todoData != null) {
+            navController.previousBackStackEntry
+                ?.savedStateHandle?.remove<TodoData>("todoData")
+        }
+    }
+    todoData?.let { screenTitle = "Edit Todo" }
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        "New Todo",
+                        screenTitle,
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -85,7 +97,7 @@ fun CreateTaskScreen(navController: NavController, todoData: TodoData? = null) {
         }
     ) { paddingValues ->
         val newTaskVM: NewTaskVM = viewModel()
-
+        newTaskVM.setInitialData(todoData)
         val navigateBack by newTaskVM.navigateBack.collectAsState()
 
         LaunchedEffect(navigateBack) {
@@ -215,6 +227,8 @@ fun TaskAlarm(newTaskVM: NewTaskVM) {
 @Composable
 fun SaveTask(newTaskVM: NewTaskVM) {
     val context = LocalContext.current
+    var btnText by remember { mutableStateOf("Save Todo") }
+    if (newTaskVM.isEditing) btnText = "Update Todo"
 
     Button(
         {
@@ -238,7 +252,7 @@ fun SaveTask(newTaskVM: NewTaskVM) {
         shape = RoundedCornerShape(16.dp)
     ) {
         Text(
-            "Save Todo",
+            btnText,
             style = MaterialTheme.typography.headlineSmall
         )
     }
